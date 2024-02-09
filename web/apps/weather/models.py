@@ -3,7 +3,9 @@ from django.db.models import JSONField
 
 
 class Country(models.Model):
+
     name = models.CharField(max_length=100)
+
 
 
 class City(models.Model):

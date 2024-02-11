@@ -138,3 +138,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
+
+OPEN_WEATHER_API_KEY = os.getenv("OPEN_WEATHER_API_KEY")

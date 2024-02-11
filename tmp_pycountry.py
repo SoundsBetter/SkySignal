@@ -2,6 +2,6 @@ import pycountry
 import pgeocode
 import json
 
-countries =  pycountry.countries
+country =  pycountry.countries.lookup("USA")
 
-print(countries)
+print(country)

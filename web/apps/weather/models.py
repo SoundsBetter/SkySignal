@@ -4,8 +4,8 @@ from django.db.models import JSONField
 
 class Country(models.Model):
     country_code = models.CharField(max_length=3, primary_key=True)
-    name = models.CharField(max_length=100)
-    official_name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
+    official_name = models.CharField(max_length=100, null=True)
 
 
 class City(models.Model):

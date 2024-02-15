@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Subscription(models.Model):
+class SubscriptionWeather(models.Model):
     class Period(models.IntegerChoices):
         ONE = 1
         THREE = 3

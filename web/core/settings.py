@@ -140,3 +140,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
 
 OPEN_WEATHER_API_KEY = os.getenv("OPEN_WEATHER_API_KEY")
+OPEN_GEO_DOMAIN = "https://api.openweathermap.org/geo/1.0/direct"
+OPEN_WEATHER_DOMAIN = "https://api.openweathermap.org/data/2.5/weather"

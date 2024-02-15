@@ -10,10 +10,9 @@ router = routers.DefaultRouter()
 
 viewsets = [
     ("users", user_views.UserViewSet, "user"),
-    ("subscriptions", subscriptions_views.SubscriptionViewSet, "subscription"),
-    ("countries", weather_views.CountryViewSet, "country"),
+    ("subscriptions", subscriptions_views.SubscriptionViewSet, "subscriptionweather"),
     ("cities", weather_views.CityViewSet, "city"),
-    ("weather_data", weather_views.WeatherDataViewSet, "weather_data"),
+    ("weatherdata", weather_views.WeatherDataViewSet, "weatherdata"),
 
 ]
 

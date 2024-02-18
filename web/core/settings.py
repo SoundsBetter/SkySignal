@@ -179,6 +179,8 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 GH_CALLBACK_URL = os.getenv("GH_CALLBACK_URL")
+GH_CLIENT_ID = os.getenv("GH_CLIENT_ID")
+GH_SECRET = os.getenv("GH_SECRET")
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
         'APP': {

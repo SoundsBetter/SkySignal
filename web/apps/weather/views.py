@@ -10,6 +10,7 @@ class CityViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
     serializer_class = CitySerializer
@@ -19,9 +20,9 @@ class CityViewSet(
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        name = data.get("name")
+        name = data.get("name", None)
         country = data.get("country", None)
-        state = data.get("region", None)
+        state = data.get("state", None)
         city = self.service.fetch_city_data(
             name=name,
             country=country,

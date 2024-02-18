@@ -5,12 +5,13 @@ from .services import WeatherService
 
 
 class CitySerializer(serializers.HyperlinkedModelSerializer):
-    region = serializers.CharField(
+    name = serializers.CharField(required=True)
+    state = serializers.CharField(
         required=False, allow_null=True, allow_blank=True
     )
     class Meta:
         model = City
-        fields = ["url", 'id', 'name', 'country', "region", "lat", "lon"]
+        fields = ["url", 'id', 'name', 'country', "state", "lat", "lon"]
 
 
 class WeatherDataSerializer(serializers.HyperlinkedModelSerializer):

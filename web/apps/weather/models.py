@@ -5,7 +5,7 @@ from django.db.models import JSONField
 class City(models.Model):
     name = models.CharField(max_length=255)
     country = models.CharField(max_length=3)
-    region = models.CharField(max_length=255, blank=True, null=True)
+    state = models.CharField(max_length=255, blank=True, null=True)
     lat = models.FloatField()
     lon = models.FloatField()
 

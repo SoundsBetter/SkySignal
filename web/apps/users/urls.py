@@ -7,8 +7,6 @@ urlpatterns = [
         "registration/", include("dj_rest_auth.registration.urls")
     ),
     path("github/login/", GitHubLogin.as_view(), name="github_login"),
-    path("github/login/link/", github_get_link, name="github_login"),
-    path("github/login/callback/", github_get_callback, name="github_callback"),
     path("", include("allauth.urls")),
     re_path(
         r'^account-confirm-email/(?P<key>[-:\w]+)/$',

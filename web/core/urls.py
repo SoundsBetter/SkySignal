@@ -42,4 +42,5 @@ urlpatterns = [
         name="redoc",
     ),
     path("auth/", include("apps.users.urls")),
+    path("auth/", include("apps.users.dev_urls")),
 ]

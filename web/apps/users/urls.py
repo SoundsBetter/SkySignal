@@ -1,6 +1,7 @@
 from django.urls import path, include, re_path
 
-from .views import DevConfirmTemplateView, GitHubLogin
+from .views import GitHubLogin
+
 urlpatterns = [
     path("", include("dj_rest_auth.urls")),
     path(
@@ -8,9 +9,4 @@ urlpatterns = [
     ),
     path("github/login/", GitHubLogin.as_view(), name="github_login"),
     path("", include("allauth.urls")),
-    re_path(
-        r'^account-confirm-email/(?P<key>[-:\w]+)/$',
-        DevConfirmTemplateView.as_view(),
-        name='account_confirm_email',
-    ),
 ]

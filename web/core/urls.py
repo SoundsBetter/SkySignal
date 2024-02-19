@@ -26,7 +26,6 @@ viewsets = [
 
 for prefix, viewset, basename in viewsets:
     router.register(prefix, viewset, basename)
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include(router.urls)),
@@ -41,6 +40,8 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    # path("auth/", include("apps.users.dev_urls")),
     path("auth/", include("apps.users.urls")),
-    path("auth/", include("apps.users.dev_urls")),
+
 ]
+

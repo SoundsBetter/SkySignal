@@ -18,5 +18,20 @@ services:
     depends_on:
       - db
 
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+
+  celery:
+    build: ./web
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - ./web:/usr/src/web/
+    depends_on:
+      - db
+      - redis
+
+
 volumes:
   postgres_data:

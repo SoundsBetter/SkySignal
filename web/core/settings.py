@@ -184,7 +184,7 @@ GH_SECRET = os.getenv("GH_SECRET")
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
         'APP': {
-            'client_id': "AHAHAHAHAHAHAAH",#os.getenv("GH_CLIENT_ID"),
+            'client_id': os.getenv("GH_CLIENT_ID"),
             'secret': os.getenv("GH_SECRET"),
             'key': '',
             'redirect_uri': GH_CALLBACK_URL,

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -9,7 +9,6 @@ from rest_framework.routers import DefaultRouter
 
 from apps.subscriptions import views as subscriptions_views
 from apps.users import views as user_views
-from apps.users.views import DevConfirmTemplateView
 from apps.weather import views as weather_views
 
 router = DefaultRouter()
@@ -42,5 +41,5 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    path("auth/", include("apps.users.urls"))
+    path("auth/", include("apps.users.urls")),
 ]

@@ -1,6 +1,6 @@
-from django.urls import path, include, re_path
+from django.urls import path, re_path
 
-from .dev_views import DevConfirmTemplateView
+from .dev_views import DevConfirmTemplateView, github_get_link
 
 urlpatterns = [
     re_path(
@@ -8,5 +8,5 @@ urlpatterns = [
         DevConfirmTemplateView.as_view(),
         name='account_confirm_email',
     ),
-
+    path('github/link/', github_get_link, name='github_get_link')
 ]

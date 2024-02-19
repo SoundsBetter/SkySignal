@@ -1,6 +1,6 @@
 from django.urls import path, include, re_path
 
-from .views import DevConfirmTemplateView, GitHubLogin, github_get_link, github_get_callback
+from .views import DevConfirmTemplateView, GitHubLogin
 urlpatterns = [
     path("", include("dj_rest_auth.urls")),
     path(

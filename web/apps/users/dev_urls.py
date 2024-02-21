@@ -9,5 +9,5 @@ urlpatterns = [
         name='account_confirm_email',
     ),
     path('github/link/', github_get_link, name='github_get_link'),
-    path('github/login/callback/', github_callback, name='github_callback'),
+    # path('github/login/callback/', github_callback, name='github_callback'),
 ]

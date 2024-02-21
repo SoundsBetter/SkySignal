@@ -23,15 +23,25 @@ services:
     ports:
       - 6379:6379
 
-  celery:
+  celeryworker:
     build: ./web
     command: celery -A core worker --loglevel=info
+    volumes:
+      - ./web:/usr/src/web/
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+
+  celerybeat:
+    build: ./web
+    command: celery -A core beat --loglevel=info
     volumes:
       - ./web:/usr/src/web/
     depends_on:
       - db
       - redis
-
 
 volumes:
   postgres_data:

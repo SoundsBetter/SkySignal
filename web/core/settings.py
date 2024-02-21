@@ -192,8 +192,6 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-
-
 REST_AUTH = {
     'LOGIN_SERIALIZER': 'dj_rest_auth.serializers.LoginSerializer',
     'TOKEN_SERIALIZER': 'dj_rest_auth.serializers.TokenSerializer',
@@ -246,3 +244,27 @@ EMAIL_PORT = os.getenv("EMAIL_PORT", "")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = True
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_RESULT_EXPIRES = 5
+
+# CELERY_BEAT_SCHEDULE = {
+#     "one": {
+#         "task": "apps.subscriptions.tasks.check_subscriptions_one",
+#         "schedule": 2.0,
+#     },
+#     "three": {
+#         "task": "apps.subscriptions.tasks.check_subscriptions_three",
+#         "schedule": 6.0,
+#     },
+#     "six": {
+#         "task": "apps.subscriptions.tasks.check_subscriptions_six",
+#         "schedule": 12.0,
+#     },
+#     "twelve": {
+#         "task": "apps.subscriptions.tasks.check_subscriptions_twelve",
+#         "schedule": 24.0,
+#     }
+# }

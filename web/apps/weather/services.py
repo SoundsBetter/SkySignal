@@ -18,8 +18,8 @@ class CityService:
         data = response.json()
         if not data:
             return None
-        if len(data) > 1:
-            return data
+        # if len(data) > 1:
+        #     return data
         return data[0]
 
 

@@ -30,5 +30,5 @@ app.conf.beat_schedule = {
     "twelve": {
         "task": "apps.subscriptions.tasks.check_subscriptions_twelve",
         "schedule": 36.0,
-    }
+    },
 }

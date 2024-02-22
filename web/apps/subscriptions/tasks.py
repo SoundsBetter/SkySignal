@@ -1,10 +1,9 @@
 import json
-from datetime import datetime, timedelta
+from time import sleep
 
 import redis
+from datetime import datetime
 from celery import shared_task
-
-from apps.weather.serializers import CitySerializer
 
 from .models import SubscriptionWeather
 
@@ -15,14 +14,16 @@ pubsub.subscribe("tasks_channel")
 
 
 def check_subscription(period: int):
+    now_timestamp = datetime.now().timestamp()
     res_cities = [
         {"city": sub.city.id, "user": sub.user.id}
         for sub in SubscriptionWeather.objects.filter(period=period).all()
     ]
-    redis_client.set(
-        f"task_one_{datetime.now().timestamp()}", json.dumps(res_cities)
+    redis_client.setex(
+        name=f"task_one_{now_timestamp}",
+        time=3600,
+        value=json.dumps(res_cities),
     )
-    return res_cities
 
 
 @shared_task
@@ -47,6 +48,7 @@ def check_subscriptions_twelve():
 
 @shared_task
 def aggregate_results_hourly():
+    sleep(0.1)
     now_timestamp = datetime.now().timestamp()
     one_hour_ago = now_timestamp - 3
 

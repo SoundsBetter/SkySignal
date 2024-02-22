@@ -1,6 +1,7 @@
 import os
 
 from celery import Celery
+from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
@@ -13,26 +14,26 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     "aggregated": {
         "task": "apps.subscriptions.tasks.aggregated_results_hourly",
-        "schedule": 3.0
+        "schedule": settings.MIN_PERIOD
     },
     "one": {
         "task": "apps.subscriptions.tasks.check_subscriptions_one",
-        "schedule": 3.0,
+        "schedule": settings.MIN_PERIOD,
     },
     "three": {
         "task": "apps.subscriptions.tasks.check_subscriptions_three",
-        "schedule": 9.0,
+        "schedule": settings.MIN_PERIOD * 3,
     },
     "six": {
         "task": "apps.subscriptions.tasks.check_subscriptions_six",
-        "schedule": 18.0,
+        "schedule": settings.MIN_PERIOD * 6,
     },
     "twelve": {
         "task": "apps.subscriptions.tasks.check_subscriptions_twelve",
-        "schedule": 36.0,
+        "schedule": settings.MIN_PERIOD * 12,
     },
     "fetch_weather_data": {
         "task": "apps.subscriptions.tasks.fetch_weather_data",
-        "schedule": 3.0
+        "schedule": settings.MIN_PERIOD
     }
 }

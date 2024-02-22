@@ -19,6 +19,8 @@ class CitySerializer(serializers.HyperlinkedModelSerializer):
 
 class WeatherDataSerializer(serializers.HyperlinkedModelSerializer):
     service = WeatherService()
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
+    data = serializers.SerializerMethodField(read_only=False)
     class Meta:
         model = WeatherData
         fields = '__all__'

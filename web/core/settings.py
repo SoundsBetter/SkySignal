@@ -269,3 +269,5 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 #         "schedule": 24.0,
 #     }
 # }
+
+MIN_PERIOD = 15.0

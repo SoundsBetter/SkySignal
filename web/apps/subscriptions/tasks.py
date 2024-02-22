@@ -4,10 +4,11 @@ from time import sleep
 import redis
 from datetime import datetime
 from celery import shared_task
+from django.db import transaction
 
 from .models import SubscriptionWeather
-from apps.weather.services import WeatherService
 from apps.weather.models import City
+from apps.weather.serializers import WeatherDataSerializer
 
 redis_client = redis.Redis(host="redis", port=6379, db=0)
 pubsub = redis_client.pubsub()
@@ -23,7 +24,7 @@ def check_subscription(period: int):
     ]
     redis_client.setex(
         name=f"check_subscriptions_{now_timestamp}",
-        time=3600,
+        time=60,
         value=json.dumps(res_cities),
     )
 
@@ -63,26 +64,41 @@ def aggregated_results_hourly():
         if one_hour_ago <= task_timestamp <= now_timestamp:
             result_ids = json.loads(redis_client.get(key))
             aggregate_results.extend(result_ids)
-    redis_client.set(
+    redis_client.setex(
         name=f"aggregated_results",
+        time=60,
         value=json.dumps(aggregate_results),
     )
+    print(aggregate_results)
+
+
+def create_list_of_cities_by_user(
+    aggregate_results: list[dict[str, int]]
+) -> dict[int, list[int]]:
+    list_of_cities_by_user = {}
+    for sub in aggregate_results:
+        user, city = sub["user"], sub["city"]
+        if user in list_of_cities_by_user:
+            list_of_cities_by_user[user].append(city)
+        else:
+            list_of_cities_by_user[user] = [city]
+    return list_of_cities_by_user
+
 
 
 @shared_task
 def fetch_weather_data():
-    service = WeatherService()
     sleep(0.3)
     aggregated_results_json = redis_client.get("aggregated_results")
-    aggregated_results = json.loads(aggregated_results_json.decode('utf-8'))
+    aggregated_results = json.loads(aggregated_results_json.decode("utf-8"))
     cities_set = {data["city"] for data in aggregated_results}
-    cites = [City.objects.get(pk=city) for city in cities_set]
-    for city in cites:
-        print(city)
-    weather_data = [
-        service.fetch_weather_data(lat=city.lat, lon=city.lon)
-        for city in cites
-    ]
-    print(weather_data)
-
-
+    with transaction.atomic():
+        for city_id in cities_set:
+            city_instance = City.objects.get(pk=city_id)
+            serializer = WeatherDataSerializer(data={"city": city_instance.pk})
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                print(
+                    f"Some problem with {city_instance.name}: {serializer.errors}"
+                )

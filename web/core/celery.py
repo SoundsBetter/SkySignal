@@ -11,20 +11,24 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
+    "aggregate": {
+        "task": "apps.subscriptions.tasks.aggregate_results_hourly",
+        "schedule": 3.0
+    },
     "one": {
         "task": "apps.subscriptions.tasks.check_subscriptions_one",
-        "schedule": 2.0,
+        "schedule": 3.0,
     },
     "three": {
         "task": "apps.subscriptions.tasks.check_subscriptions_three",
-        "schedule": 6.0,
+        "schedule": 9.0,
     },
     "six": {
         "task": "apps.subscriptions.tasks.check_subscriptions_six",
-        "schedule": 12.0,
+        "schedule": 18.0,
     },
     "twelve": {
         "task": "apps.subscriptions.tasks.check_subscriptions_twelve",
-        "schedule": 24.0,
+        "schedule": 36.0,
     }
 }

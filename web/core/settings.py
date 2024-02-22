@@ -249,25 +249,6 @@ EMAIL_USE_TLS = True
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-# CELERY_RESULT_EXPIRES = timedelta(minutes=1)
+CELERY_RESULT_EXPIRES = timedelta(minutes=1)
 
-# CELERY_BEAT_SCHEDULE = {
-#     "one": {
-#         "task": "apps.subscriptions.tasks.check_subscriptions_one",
-#         "schedule": 2.0,
-#     },
-#     "three": {
-#         "task": "apps.subscriptions.tasks.check_subscriptions_three",
-#         "schedule": 6.0,
-#     },
-#     "six": {
-#         "task": "apps.subscriptions.tasks.check_subscriptions_six",
-#         "schedule": 12.0,
-#     },
-#     "twelve": {
-#         "task": "apps.subscriptions.tasks.check_subscriptions_twelve",
-#         "schedule": 24.0,
-#     }
-# }
-
-MIN_PERIOD = 15.0
+MIN_PERIOD = 60.0

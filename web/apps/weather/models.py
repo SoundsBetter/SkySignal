@@ -14,7 +14,9 @@ class City(models.Model):
 
 
 class WeatherData(models.Model):
-    city = models.ForeignKey("City", on_delete=models.CASCADE)
+    city = models.ForeignKey(
+        "City", on_delete=models.CASCADE, related_name="weather_data_set"
+    )
     data = JSONField()
     datetime = models.DateTimeField(auto_now_add=True)
 

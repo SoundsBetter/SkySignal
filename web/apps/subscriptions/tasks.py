@@ -4,11 +4,14 @@ from time import sleep
 import redis
 from datetime import datetime
 from celery import shared_task
+from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import Prefetch
 
 from .models import SubscriptionWeather
-from apps.weather.models import City
+from apps.weather.models import City, WeatherData
 from apps.weather.serializers import WeatherDataSerializer
+from apps.users.models import User
 
 redis_client = redis.Redis(host="redis", port=6379, db=0)
 pubsub = redis_client.pubsub()
@@ -16,7 +19,7 @@ pubsub = redis_client.pubsub()
 pubsub.subscribe("tasks_channel")
 
 
-def check_subscription(period: int):
+def check_subscription(period: int) -> None:
     now_timestamp = datetime.now().timestamp()
     res_cities = [
         {"city": sub.city.id, "user": sub.user.id}
@@ -30,27 +33,27 @@ def check_subscription(period: int):
 
 
 @shared_task
-def check_subscriptions_one():
+def check_subscriptions_one() -> None:
     return check_subscription(1)
 
 
 @shared_task
-def check_subscriptions_three():
+def check_subscriptions_three() -> None:
     return check_subscription(3)
 
 
 @shared_task
-def check_subscriptions_six():
+def check_subscriptions_six() -> None:
     return check_subscription(6)
 
 
 @shared_task
-def check_subscriptions_twelve():
+def check_subscriptions_twelve() -> None:
     return check_subscription(12)
 
 
 @shared_task
-def aggregated_results_hourly():
+def aggregated_results_hourly() -> None:
     sleep(0.1)
     now_timestamp = datetime.now().timestamp()
     one_hour_ago = now_timestamp - 3
@@ -69,7 +72,6 @@ def aggregated_results_hourly():
         time=60,
         value=json.dumps(aggregate_results),
     )
-    print(aggregate_results)
 
 
 def create_list_of_cities_by_user(
@@ -87,7 +89,7 @@ def create_list_of_cities_by_user(
 
 
 @shared_task
-def fetch_weather_data():
+def fetch_weather_data() -> None:
     sleep(0.3)
     aggregated_results_json = redis_client.get("aggregated_results")
     aggregated_results = json.loads(aggregated_results_json.decode("utf-8"))
@@ -102,3 +104,35 @@ def fetch_weather_data():
                 print(
                     f"Some problem with {city_instance.name}: {serializer.errors}"
                 )
+
+
+@shared_task
+def send_mail_with_weather_data() -> None:
+    sleep(2)
+    aggregated_results_json = redis_client.get("aggregated_results")
+    aggregated_results = json.loads(aggregated_results_json.decode("utf-8"))
+    list_of_cities_by_user = create_list_of_cities_by_user(aggregated_results)
+
+    for user_id, city_ids in list_of_cities_by_user.items():
+        weather_data_for_user = []
+        user = User.objects.get(pk=user_id)
+        cities = City.objects.filter(pk__in=city_ids).prefetch_related(
+            Prefetch(
+                "weather_data_set",
+                 queryset=WeatherData.objects.order_by("-datetime"),
+                to_attr="latest_weather_data",
+            )
+        )
+        for city in cities:
+            if city.latest_weather_data:
+                weather_data_for_user.append(
+                    city.latest_weather_data[0].data
+                )
+
+        send_mail(
+            subject=f"Weather data for {user}",
+            message=f"{weather_data_for_user}",
+            from_email=f"fake@gmail.com",
+            recipient_list=[user.email],
+        )
+

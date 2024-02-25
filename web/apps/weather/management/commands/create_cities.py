@@ -1,9 +1,8 @@
 from django.core.management import BaseCommand
-from django.db import IntegrityError
 
-from ...models import City
-from ...serializers import CitySerializer
-from ...services import CityService
+
+from apps.weather.serializers import CitySerializer
+from apps.weather.services import CityService
 
 CITIES = [
     "Kyiv",

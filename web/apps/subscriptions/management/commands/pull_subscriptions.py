@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 from django.db import IntegrityError
 
-from ...models import SubscriptionWeather
+from apps.subscriptions.models import SubscriptionWeather
 
 PERIODS = [1, 3, 6, 12]
 USERS = range(1, 6)

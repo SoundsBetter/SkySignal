@@ -13,14 +13,12 @@ class CityService:
         query = ",".join(
             part for part in [name, state, country] if part
         )
-        url = f"{self.domain}?q={query}&limit={limit}&appid={self.api_key}"
-        response = requests.get(url)
-        data = response.json()
-        if not data:
+        payload = {"q": query, "limit": limit, "appid": self.api_key}
+        response = requests.get(self.domain, params=payload)
+        city_data = response.json()
+        if not city_data:
             return None
-        # if len(data) > 1:
-        #     return data
-        return data[0]
+        return city_data[0]
 
 
 class WeatherService:
@@ -31,9 +29,9 @@ class WeatherService:
     def fetch_weather_data(
             self, lat, lon
     ):
-        url = f"{self.domain}?lat={lat}&lon={lon}&appid={self.api_key}"
-        response = requests.get(url)
-        data = response.json()
-        if not data:
+        payload = {"lat": lat, "lon": lon, "appid": self.api_key}
+        response = requests.get(self.domain, params=payload)
+        weather_data = response.json()
+        if not weather_data:
             return None
-        return data
+        return weather_data

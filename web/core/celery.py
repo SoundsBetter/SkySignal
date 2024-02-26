@@ -14,6 +14,6 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     "subscriptions_every_hour": {
         "task": "apps.subscriptions.tasks.get_subscriptions_every_hour",
-        "schedule": crontab(),
+        "schedule": crontab(minute=0),
     }
 }

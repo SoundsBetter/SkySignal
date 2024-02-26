@@ -1,15 +1,19 @@
-
+from collections import defaultdict
 from datetime import datetime
+from time import sleep
 from typing import Any
-
-from celery import shared_task, chord, group
+from celery import shared_task, chord, group, chain
 from django.core.mail import send_mail
 from django.db.models import Prefetch
+from celery.utils.log import get_task_logger
 
-from .models import SubscriptionWeather
 from apps.weather.models import City, WeatherData
-from apps.weather.serializers import WeatherDataSerializer
+from apps.weather.services import WeatherDataService
+from apps.subscriptions.models import SubscriptionWeather
 from apps.users.models import User
+
+logger = get_task_logger(__name__)
+
 
 def get_tasks_for_current_time() -> list[Any]:
     tasks = []
@@ -26,16 +30,14 @@ def get_tasks_for_current_time() -> list[Any]:
         tasks.append(check_subscriptions.s(12))
     return tasks
 
+
 def create_list_of_cities_by_user(
     list_of_subscriptions: list[dict[str, int]]
 ) -> dict[int, list[int]]:
-    list_of_cities_by_user = {}
+    list_of_cities_by_user = defaultdict(list)
     for sub in list_of_subscriptions:
         user, city = sub["user"], sub["city"]
-        if user in list_of_cities_by_user:
-            list_of_cities_by_user[user].append(city)
-        else:
-            list_of_cities_by_user[user] = [city]
+        list_of_cities_by_user[user].append(city)
     return list_of_cities_by_user
 
 
@@ -56,50 +58,73 @@ def get_subscriptions_every_hour():
 
 
 @shared_task
+def bridge_task(*args, **kwargs):
+    print(f"{args=} {kwargs=}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    pass
+
+
+@shared_task
 def process_subscription_results(result: list[list[dict[str, int]]]):
     list_of_subscriptions = [sub for subs in result for sub in subs]
-    cities_by_user = create_list_of_cities_by_user(list_of_subscriptions)
     cities_set = {sub["city"] for sub in list_of_subscriptions}
-    fetch_weather_tasks = [
+    cities_by_user = create_list_of_cities_by_user(list_of_subscriptions)
+    fetch_weather_tasks = group(
         fetch_weather_data.s(city_id) for city_id in cities_set
-    ]
-    send_mail_with_weather_tasks = [
-        send_mail_with_weather_data.s(user_id, city_ids)
+    )
+    send_mail_with_weather_tasks = group(
+        send_mail_with_weather_data.s(user_id=user_id, city_ids=city_ids)
         for user_id, city_ids in cities_by_user.items()
-    ]
-    group(*fetch_weather_tasks)()
-    group(*send_mail_with_weather_tasks)()
+    )
+    # fetch_weather_tasks()
+    # send_mail_with_weather_tasks.apply_async(countdown=15)
+    chain(
+        fetch_weather_tasks | bridge_task.s() | send_mail_with_weather_tasks
+    ).apply_async()
+    # task_controller(cities_set=cities_set, cities_by_user=cities_by_user)
 
+
+# def task_controller(
+#         cities_set: set[int], cities_by_user: dict[int, list[int]]
+# ) -> None:
+#     fetch_weather_tasks = group(
+#         fetch_weather_data.s(city_id) for city_id in cities_set
+#     )
+#     send_mail_with_weather_tasks = group(
+#         send_mail_with_weather_data.s(user_id, city_ids)
+#         for user_id, city_ids in cities_by_user.items()
+#     )
+#     result = fetch_weather_tasks()
+#     result.get()
+#     send_mail_with_weather_tasks()
 
 
 @shared_task
 def fetch_weather_data(city_id) -> None:
+    logger.info(f"Fetching weather data for {city_id}")
+    sleep(3)
     city_instance = City.objects.get(pk=city_id)
-    serializer = WeatherDataSerializer(data={"city": city_instance.pk})
-    if serializer.is_valid():
-        serializer.save()
-    else:
-        print(
-            f"Some problem with {city_instance.name}: {serializer.errors}"
-        )
+    data = WeatherDataService().fetch_weather_data(
+        lat=city_instance.lat, lon=city_instance.lon
+    )
+    WeatherData.objects.create(city=city_instance, data=data)
 
 
 @shared_task
-def send_mail_with_weather_data(user_id, city_ids) -> None:
+def send_mail_with_weather_data(user_id, city_ids, *args, **kwargs) -> None:
+    logger.info(f"Sending {city_ids} weather data for {user_id}")
+    sleep(7)
     weather_data_for_user = []
     user = User.objects.get(pk=user_id)
     cities = City.objects.filter(pk__in=city_ids).prefetch_related(
         Prefetch(
             "weather_data_set",
-             queryset=WeatherData.objects.order_by("-datetime"),
+            queryset=WeatherData.objects.order_by("-datetime"),
             to_attr="latest_weather_data",
         )
     )
     for city in cities:
         if city.latest_weather_data:
-            weather_data_for_user.append(
-                city.latest_weather_data[0].data
-            )
+            weather_data_for_user.append(city.latest_weather_data[0].data)
 
     send_mail(
         subject=f"Weather data for {user}",
@@ -107,4 +132,3 @@ def send_mail_with_weather_data(user_id, city_ids) -> None:
         from_email=f"fake@gmail.com",
         recipient_list=[user.email],
     )
-

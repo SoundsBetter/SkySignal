@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from apps.subscriptions.models import SubscriptionWeather
 
 PERIODS = [1, 3, 6, 12]
-USERS = range(1, 6)
+USERS = range(6, 11)
 CITIES = range(1, 11)
 COUNT = 20
 

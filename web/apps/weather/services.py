@@ -7,6 +7,7 @@ class CityService:
         self.api_key = settings.OPEN_WEATHER_API_KEY
         self.domain = settings.OPEN_GEO_DOMAIN
 
+    @staticmethod
     def fetch_city_data(
             self, name=None, country=None, state=None, limit=5
     ):
@@ -21,7 +22,7 @@ class CityService:
         return city_data[0]
 
 
-class WeatherService:
+class WeatherDataService:
     def __init__(self):
         self.api_key = settings.OPEN_WEATHER_API_KEY
         self.domain = settings.OPEN_WEATHER_DOMAIN

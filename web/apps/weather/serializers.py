@@ -1,8 +1,6 @@
 from rest_framework import serializers
 
 from .models import City, WeatherData
-from .services import WeatherService
-
 
 class CitySerializer(serializers.HyperlinkedModelSerializer):
     name = serializers.CharField(required=True)
@@ -18,19 +16,8 @@ class CitySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class WeatherDataSerializer(serializers.HyperlinkedModelSerializer):
-    service = WeatherService()
     city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
-    data = serializers.SerializerMethodField(read_only=False)
     class Meta:
         model = WeatherData
         fields = '__all__'
-
-    def create(self, validated_data):
-        city_instance = validated_data.get("city")
-        data = self.service.fetch_weather_data(
-            city_instance.lat, city_instance.lon
-        )
-        return WeatherData.objects.create(
-            city=city_instance, data=data
-        )
 

@@ -58,12 +58,6 @@ def get_subscriptions_every_hour():
 
 
 @shared_task
-def bridge_task(*args, **kwargs):
-    print(f"{args=} {kwargs=}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    pass
-
-
-@shared_task
 def process_subscription_results(result: list[list[dict[str, int]]]):
     list_of_subscriptions = [sub for subs in result for sub in subs]
     cities_set = {sub["city"] for sub in list_of_subscriptions}
@@ -75,27 +69,12 @@ def process_subscription_results(result: list[list[dict[str, int]]]):
         send_mail_with_weather_data.s(user_id=user_id, city_ids=city_ids)
         for user_id, city_ids in cities_by_user.items()
     )
-    # fetch_weather_tasks()
-    # send_mail_with_weather_tasks.apply_async(countdown=15)
     chain(
-        fetch_weather_tasks | bridge_task.s() | send_mail_with_weather_tasks
+        fetch_weather_tasks,
+        send_mail_with_weather_tasks,
     ).apply_async()
-    # task_controller(cities_set=cities_set, cities_by_user=cities_by_user)
 
 
-# def task_controller(
-#         cities_set: set[int], cities_by_user: dict[int, list[int]]
-# ) -> None:
-#     fetch_weather_tasks = group(
-#         fetch_weather_data.s(city_id) for city_id in cities_set
-#     )
-#     send_mail_with_weather_tasks = group(
-#         send_mail_with_weather_data.s(user_id, city_ids)
-#         for user_id, city_ids in cities_by_user.items()
-#     )
-#     result = fetch_weather_tasks()
-#     result.get()
-#     send_mail_with_weather_tasks()
 
 
 @shared_task
@@ -110,7 +89,9 @@ def fetch_weather_data(city_id) -> None:
 
 
 @shared_task
-def send_mail_with_weather_data(user_id, city_ids, *args, **kwargs) -> None:
+def send_mail_with_weather_data(*args, **kwargs) -> None:
+    user_id = kwargs.get('user_id')
+    city_ids = kwargs.get('city_ids')
     logger.info(f"Sending {city_ids} weather data for {user_id}")
     sleep(7)
     weather_data_for_user = []

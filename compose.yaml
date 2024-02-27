@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgres_data
+    env_file:
+      - ./.env.db
+
+  web:
+    build: ./web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./web/:/usr/src/web/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+
+  celeryworker:
+    build: ./web
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - ./web:/usr/src/web/
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+
+  celerybeat:
+    build: ./web
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - ./web:/usr/src/web/
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:

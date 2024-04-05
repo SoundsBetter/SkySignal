@@ -79,8 +79,8 @@ def process_subscription_results(result: list[list[dict[str, int]]]):
 
 @shared_task
 def fetch_weather_data(city_id) -> None:
-    logger.info(f"Fetching weather data for {city_id}")
-    sleep(3)
+    # logger.info(f"Fetching weather data for {city_id}")
+    # sleep(3)
     city_instance = City.objects.get(pk=city_id)
     data = WeatherDataService().fetch_weather_data(
         lat=city_instance.lat, lon=city_instance.lon
@@ -92,8 +92,8 @@ def fetch_weather_data(city_id) -> None:
 def send_mail_with_weather_data(*args, **kwargs) -> None:
     user_id = kwargs.get('user_id')
     city_ids = kwargs.get('city_ids')
-    logger.info(f"Sending {city_ids} weather data for {user_id}")
-    sleep(7)
+    # logger.info(f"Sending {city_ids} weather data for {user_id}")
+    # sleep(7)
     weather_data_for_user = []
     user = User.objects.get(pk=user_id)
     cities = City.objects.filter(pk__in=city_ids).prefetch_related(
